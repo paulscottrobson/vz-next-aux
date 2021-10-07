@@ -82,7 +82,7 @@ static inline BYTE8 _Read(WORD16 address) {
 	if (address < RAMSIZE) {
 		if (address >= 0x6800 && address < 0x7000) {
 			BYTE8 kbd = HWReadKeyboardPort(address) | 0xC0;
-			if (cycles > cyclesPerFrame*3/4) kbd &= 0x7F;
+			if (cycles < cyclesPerFrame*3/4) kbd &= 0x7F;
 			return kbd;
 		}
 		return ramMemory[address];							
@@ -181,6 +181,7 @@ BYTE8 CPUExecuteInstruction(void) {
 	HWSync();																		// Update any hardware
 	if (intEnabled) { 																// Interrupt enabled.
 		PUSH(PC);PC = 0x38; 														// Do RST 38h
+		intEnabled = 0;
 	}
 	return FRAME_RATE;																// Return frame rate.
 }
