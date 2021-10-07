@@ -40,7 +40,8 @@ static const char *_mnemonics_ddcb[256] = {
 	#include "_mnemonics_group_ddcb.h"
 };
 
-static void DGBXRenderLine(int isGreenBackground,int y,int x1,int y1,int xSize,int ySize);
+static void DGBXRenderTextLine(int isGreenBackground,int y,int x1,int y1,int xSize,int ySize);
+static void DGBXRenderGraphicsLine(int isGreenBackground,int y,int x1,int y1,int xSize,int ySize);
 
 // *******************************************************************************************************************************
 //										 Palette conversion to 4 bit format
@@ -186,8 +187,13 @@ void DBGXRender(int *address,int showDisplay) {
 			b = b - 4;
 			r.x = x1-b;r.y = y1-b;r.w = xs*xSize*8+b*2;r.h=ys*ySize*12+b*2;
 			GFXRectangle(&r,background);
-			for (int y = 0;y < ys;y++) {
-				DGBXRenderLine(isGreenBackground,y,x1,y1,xSize,ySize);
+
+			if (isTextMode) {
+				for (int y = 0;y < ys;y++)
+					DGBXRenderTextLine(isGreenBackground,y,x1,y1,xSize,ySize);
+			} else {
+				for (int y = 0;y < 64;y++) 
+					DGBXRenderGraphicsLine(isGreenBackground,y,x1,y1,xSize,ySize);
 		 	}
 		}
 	}
@@ -197,7 +203,7 @@ void DBGXRender(int *address,int showDisplay) {
 //															Render one line
 // *******************************************************************************************************************************
 
-static void DGBXRenderLine(int isGreenBackground,int y,int x1,int y1,int xSize,int ySize) {
+static void DGBXRenderTextLine(int isGreenBackground,int y,int x1,int y1,int xSize,int ySize) {
 	for (int x = 0;x < 32;x++) 
 	{
  		int ch = CPUReadMemory(0x7000+x+y*32);
@@ -225,4 +231,19 @@ static void DGBXRenderLine(int isGreenBackground,int y,int x1,int y1,int xSize,i
 			}
  		}
  	}
+}
+
+static void DGBXRenderGraphicsLine(int isGreenBackground,int y,int x1,int y1,int xSize,int ySize) {
+	SDL_Rect rc;
+	for (int x = 0;x < 32;x++) {
+		int b = CPUReadMemory(0x7000+x+y*32);
+		int step = isGreenBackground ? 0 : 4;
+		rc.x = x1 + x * 4 * xSize * 2;rc.y = y1+y*ySize*3;rc.w = xSize*2;rc.h = ySize*3;
+		for (int px = 0;px < 4;px++) {
+			int col = (b & 0xC0) >> 6;
+			if (col != 0) GFXRectangle(&rc,DBGXPalette(col+step));
+			b = (b << 2);
+			rc.x += rc.w;
+		}
+	}
 }

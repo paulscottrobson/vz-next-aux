@@ -289,7 +289,7 @@ static BYTE8 _RotateMake(BYTE8 v,BYTE8 c) {
 #define SRRR(a) 	_RotateMake((a >> 1) | (c_Flag ? 0x80:0x00),a & 0x01)
 #define SRSLA(a) 	_RotateMake(a << 1,a & 0x80)
 #define SRSRA(a) 	_RotateMake((a >> 1) | (a & 0x80),a & 0x01)
-#define SRSRL(a) 	_RotateMake(a >> 1,a & 0x01)
+#define SRSRL(a) 	_RotateMake((a >> 1) & 0x7F,a & 0x01)
 
 // *******************************************************************************************************************************
 //
