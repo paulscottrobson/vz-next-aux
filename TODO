@@ -1,3 +1,8 @@
-interrupt timing probably.
-Sound 16,7 problem ?
-cload/csave
+mode 1
+csave
+run not working ?
+
+A crashing on 95D5.
+	
+	Set default to run here, default file A
+HALT issue.

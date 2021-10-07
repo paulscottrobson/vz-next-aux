@@ -92,19 +92,27 @@ WORD16 HWFileInformation(char *fileName,WORD16 *loadAddress,WORD16 *size) {
 //								Load file in
 // ****************************************************************************
 
-WORD16 HWLoadFile(char * fileName,BYTE8 *target) {
+WORD16 HWLoadFile(char * fileName,WORD16 *startLoad,WORD16 *endLoad,BYTE8 *type) {
 	char fullName[128];
 	if (fileName[0] == 0) return 1;
 	MKSTORAGE();
 	sprintf(fullName,"%sstorage%c%s",SDL_GetBasePath(),FILESEP,fileName);
 	FILE *f = fopen(fullName,"rb");
-	//printf("%s\n",fullName);
+//	printf("%s\n",fullName);
 	if (f != NULL) {
-		while (!feof(f)) {
+		for (int i = 0;i < 21;i++) fgetc(f); 	// Don't care (21 bytes)
+		int fType = fgetc(f); 					// File type (1 byte)
+		int start = fgetc(f); 					// Load Address (2 bytes)
+		start = start + (fgetc(f) << 8);
+		*startLoad = start; 					// Return start address
+//		printf("Loading to %x\n",start);
+		while (!feof(f)) { 						// Rest is data
 			BYTE8 data = fgetc(f);
-			*target++ = data;
+			CPUWriteMemory(start++,data);
 		}
 		fclose(f);
+		*type = fType & 0xFF; 					// Return type
+		*endLoad = start & 0xFFFF; 				// And location
 	}
 	return (f != NULL) ? 0 : 1;
 }

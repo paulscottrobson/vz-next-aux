@@ -36,12 +36,9 @@ end
 
 # *****************************************************************************
 #
-# 						Monitor ROM with patches
+# 								6847 Font ROM
 #
 # *****************************************************************************
-
-class MonitorROM < StandardROM
-end 
 
 class CharacterROM < StandardROM 
 	def initialize 
@@ -128,7 +125,36 @@ class CharacterROM < StandardROM
 	end
 end
 
+# *****************************************************************************
+#
+# 						Monitor ROM with patches
+#
+# *****************************************************************************
+
+class MonitorROM < StandardROM
+	def initialize(file_name)
+		super
+		#
+		# 		Disables the beep on keypress. Permanently.
+		#
+		patch 0x3450,0xC9
+		#
+		# 		Cassette tape patch. (see cassette.txt)
+		#
+		patch 0x3667,0xED 
+		patch 0x3668,0xFF 
+		patch 0x3669,0xC3 
+		patch 0x366A,0xCF 
+		patch 0x366B,0x36 
+
+	end
+
+	def patch(addr,byte)
+		@data[addr] = byte 
+	end
+end 
+
 if __FILE__ == $0 
-	StandardROM.new("vtechv20.u12").export_include("_v20_rom.h")
+	MonitorROM.new("vtechv20.u12").export_include("_v20_rom.h")
 	CharacterROM.new.export_include("_char_rom.h")
 end

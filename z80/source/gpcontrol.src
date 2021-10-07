@@ -54,3 +54,6 @@ ED56 "IM1" 8
 ED5E "IM2" 8
 		{}												
 
+
+EDFF "LOAD" 1
+		HWLoadProgram()

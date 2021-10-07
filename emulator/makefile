@@ -16,17 +16,11 @@ all: emulator
 #	.$(S)$(APPNAME) 
 
 run: emulator 
-	.$(S)$(APPNAME) roms$(S)aliens.cqc go
+	.$(S)$(APPNAME) filename go
 
 debug: emulator 
 	.$(S)$(APPNAME) 
-	
-tron : emulator 
-	.$(S)aqnext ..$(S)roms$(S)tron.bin.decoded  
-
-tarmin : emulator 
-	.$(S)aqnext "..$(S)roms$(S)add tarmin.bin.decoded"  
-
+		
 test : emulator
 	$(CDEL) memory.dump $(CDELQ)
 	zasm -u test.asm

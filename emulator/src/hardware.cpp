@@ -43,14 +43,41 @@ void HWReset(void) {
 
 void HWSync(void) {
 	HWSyncImplementation(0);
-	if (lastToggleCycleTime != 0 && cycleToggleCount > 4) {
-		int frequency = CYCLE_RATE/2 *cycleToggleCount/cycleToggleTotal; 	// Counting both transitions
-		printf("%d %d %d\n",frequency,cycleToggleCount,cycleToggleTotal);
+	if (lastToggleCycleTime != 0 && cycleToggleCount > 1) {
+		int frequency = CYCLE_RATE /2*cycleToggleCount/cycleToggleTotal; 	// Counting both transitions
 		GFXSetFrequency(frequency);
 	} else {
 		GFXSetFrequency(0);
 	}
 	lastToggleCycleTime = 0;
+}
+
+// *******************************************************************************************************************************
+// 												 Program Loader
+// *******************************************************************************************************************************
+
+void HWLoadProgram(void) {
+	char fileName[32];
+	int ptr = 0x7A9D;
+	int offset = 0;
+	WORD16 startAddress,endAddress;
+	BYTE8 fileType;
+
+	while (CPUReadMemory(ptr+offset) != 0) {
+		fileName[offset] = tolower(CPUReadMemory(ptr+offset));
+		offset++;
+	}
+	if (offset == 0) {
+		// Load directory into BASIC
+		fileName[offset++] = 'a';
+	}
+	strcpy(fileName+offset,".vz");
+	int err = HWLoadFile(fileName,&startAddress,&endAddress,&fileType);
+	if (fileType == 0xF1) CPUSetPC(startAddress);
+	if (err) CPUSetPC(0x1E4A);
+
+	CPUWriteMemory(0x78F9,endAddress & 0xFF);
+	CPUWriteMemory(0x78FA,endAddress >> 8);
 }
 
 // *******************************************************************************************************************************
@@ -92,17 +119,6 @@ BYTE8 HWReadPort(WORD16 addr) {
 
 void HWWritePort(WORD16 addr,BYTE8 data) {
 	BYTE8 port = addr & 0xFF;
-	// if (port == 0xFC && lastControlWrite != (data & 1)) {
-	// 	lastControlWrite = (data & 1);
-	// 	if (lastToggleCycleTime == 0) {
-	// 		cycleToggleCount = 0;
-	// 		cycleToggleTotal = 0;
-	// 	} else {
-	// 		cycleToggleCount++;
-	// 		cycleToggleTotal += abs(lastToggleCycleTime - CPUGetCycles());
-	// 	}
-	// 	lastToggleCycleTime = CPUGetCycles();
-	// }
 }
 
 // *******************************************************************************************************************************
