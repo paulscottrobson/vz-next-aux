@@ -18,7 +18,6 @@
 //														   Timing
 // *******************************************************************************************************************************
 
-#define CYCLE_RATE 		(3580*1000)													// Cycles per second (3.58Mhz)
 #define FRAME_RATE		(50)														// Frames per second (50Hz)
 #define CYCLES_PER_FRAME (CYCLE_RATE / FRAME_RATE) 									// Cycles per frame.
 
@@ -82,7 +81,7 @@ static inline BYTE8 _Read(WORD16 address) {
 	if (address < RAMSIZE) {
 		if (address >= 0x6800 && address < 0x7000) {
 			BYTE8 kbd = HWReadKeyboardPort(address) | 0xC0;
-			if (cycles < cyclesPerFrame*3/4) kbd &= 0x7F;
+			if (cycles > cyclesPerFrame*3/4) kbd &= 0x7F;
 			return kbd;
 		}
 		return ramMemory[address];							
@@ -98,6 +97,9 @@ static void _Write(WORD16 address,BYTE8 data) {
 	if (address >= 0x4000 && address <= RAMSIZE) {
 		ramMemory[address] = data;
 	}	
+	if (address >= 0x6800 && address < 0x7000) {
+		HWWriteControlLatch(data);
+	}
 }
 
 static WORD16 _Fetch16(void) {
@@ -107,7 +109,7 @@ static WORD16 _Fetch16(void) {
 }
 
 BYTE8 CPUReadCharacterROM(int ch,int row) {
-	return _char_rom[(ch & 0x3F)*12+row];
+	return _char_rom[ch*12+row];
 }
 
 // *******************************************************************************************************************************
@@ -123,7 +125,7 @@ BYTE8 CPUReadCharacterROM(int ch,int row) {
 
 #include "cpu_support.h"
 
-WORD16 CPUGetCycles(void) {
+int CPUGetCycles(void) {
 	return cycles;
 }
 

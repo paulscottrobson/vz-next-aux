@@ -16,7 +16,9 @@ void HWReset(void);
 void HWSync(void);
 BYTE8 HWReadPort(WORD16 addr);
 void HWWritePort(WORD16 addr,BYTE8 data);
-
+void HWWriteControlLatch(BYTE8 data);
+BYTE8 HWGetVideoMode(void);
+BYTE8 *HWGetPalette(BYTE8 colour);
 BYTE8 HWReadKeyboardPort(WORD16 addr);
 int HWGetKeyboardRow(int row);
 void HWSyncImplementation(LONG32 iCount);

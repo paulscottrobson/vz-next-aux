@@ -14,10 +14,18 @@
 #include "gfx.h"
 #include <stdlib.h>
 
-static int soundPortState = 0;
+static int lastControlWrite = 0;
 static int lastToggleCycleTime = 0;
 static int cycleToggleCount = 0;
 static int cycleToggleTotal = 0;
+
+//	Control 
+//		20 Speaker B
+// 		10 VDC Background colour (0=green,1 = orange/buff)
+//		08 VDC Display Mode (0=text,1 = graphics)
+//		04 Cassette out MSB
+// 		02 Cassette out LSB
+// 		01 Speaker A
 
 // *******************************************************************************************************************************
 //												Reset Hardware
@@ -26,6 +34,7 @@ static int cycleToggleTotal = 0;
 void HWReset(void) {	
 	GFXSetFrequency(0);
 	lastToggleCycleTime = 0;
+	lastControlWrite = 0;
 }
 
 // *******************************************************************************************************************************
@@ -35,15 +44,40 @@ void HWReset(void) {
 void HWSync(void) {
 	HWSyncImplementation(0);
 	if (lastToggleCycleTime != 0 && cycleToggleCount > 4) {
-		//
-		//		The actual frequency is Clock Frequency (3.54Mhz) / 64 / Sound parameter.
-		//
-		int frequency = 280952*cycleToggleCount/cycleToggleTotal;
+		int frequency = CYCLE_RATE/2 *cycleToggleCount/cycleToggleTotal; 	// Counting both transitions
+		printf("%d %d %d\n",frequency,cycleToggleCount,cycleToggleTotal);
 		GFXSetFrequency(frequency);
 	} else {
 		GFXSetFrequency(0);
 	}
 	lastToggleCycleTime = 0;
+}
+
+// *******************************************************************************************************************************
+//													Latch write
+// *******************************************************************************************************************************
+
+void HWWriteControlLatch(BYTE8 data) {
+	//
+	// 		Check mode change or background change.
+	//
+	if ((data & 0x18) != (lastControlWrite & 0x18)) {
+		// TODO: Refresh screen entirely on mode change.
+	}
+	//
+	// 		Assume pushing and pulling :)
+	//
+	if ((data & 0x01) != (lastControlWrite & 0x01)) {
+		if (lastToggleCycleTime == 0) {
+			cycleToggleCount = 0;
+			cycleToggleTotal = 0;
+		} else {
+			cycleToggleCount++;
+			cycleToggleTotal += abs(lastToggleCycleTime - CPUGetCycles());
+		}
+		lastToggleCycleTime = CPUGetCycles();
+	}
+	lastControlWrite = data;
 }
 
 // *******************************************************************************************************************************
@@ -58,8 +92,8 @@ BYTE8 HWReadPort(WORD16 addr) {
 
 void HWWritePort(WORD16 addr,BYTE8 data) {
 	BYTE8 port = addr & 0xFF;
-	// if (port == 0xFC && soundPortState != (data & 1)) {
-	// 	soundPortState = (data & 1);
+	// if (port == 0xFC && lastControlWrite != (data & 1)) {
+	// 	lastControlWrite = (data & 1);
 	// 	if (lastToggleCycleTime == 0) {
 	// 		cycleToggleCount = 0;
 	// 		cycleToggleTotal = 0;
@@ -81,4 +115,43 @@ BYTE8 HWReadKeyboardPort(WORD16 addr) {
 		if ((addr & (0x01 << i)) == 0) v |= HWGetKeyboardRow(i);
 	}
 	return v ^ 0xFF;
+}
+
+// *******************************************************************************************************************************
+// 													6847 Palette Data as RGB
+// *******************************************************************************************************************************
+
+static BYTE8 _6847_palette[][3] = {
+    { 0x30, 0xd2, 0x00 }, /* 0 GREEN */
+    { 0xc1, 0xe5, 0x00 }, /* YELLOW */
+    { 0x4c, 0x3a, 0xb4 }, /* BLUE */
+    { 0x9a, 0x32, 0x36 }, /* RED */
+    { 0xbf, 0xc8, 0xad }, /* BUFF */
+    { 0x41, 0xaf, 0x71 }, /* CYAN */
+    { 0xc8, 0x4e, 0xf0 }, /* MAGENTA */
+    { 0xd4, 0x7f, 0x00 }, /* ORANGE */
+
+    { 0x26, 0x30, 0x16 }, /* 8 BLACK */
+    { 0x30, 0xd2, 0x00 }, /* 9 GREEN */
+    { 0x26, 0x30, 0x16 }, /* 10 BLACK */
+    { 0xbf, 0xc8, 0xad }, /* 11 BUFF */
+
+    { 0x00, 0x4c, 0x00 }, /* 12 ALPHANUMERIC DARK GREEN */
+    { 0x30, 0xd2, 0x00 }, /* 13 ALPHANUMERIC BRIGHT GREEN */
+    { 0x6b, 0x27, 0x00 }, /* 14 ALPHANUMERIC DARK ORANGE */
+    { 0xf7, 0xb7, 0x00 }  /* 15 ALPHANUMERIC BRIGHT ORANGE */
+};
+
+// Downgraded dark colours 6C->4C green
+
+BYTE8 *HWGetPalette(BYTE8 colour) {
+	return _6847_palette[colour];
+}
+
+// *******************************************************************************************************************************
+// 													6847 Video Mode Access
+// *******************************************************************************************************************************
+
+BYTE8 HWGetVideoMode(void) {
+	return lastControlWrite & 0x18;
 }

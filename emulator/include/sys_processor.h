@@ -12,6 +12,8 @@
 #ifndef _PROCESSOR_H
 #define _PROCESSOR_H
 
+#define CYCLE_RATE 		(3580*1000)													// Cycles per second (3.58Mhz)
+
 #define RAMSIZE 		(0x8000)													// Max memory in PC version (including ROM space)
 
 typedef unsigned short WORD16;														// 8 and 16 bit types.
@@ -28,7 +30,7 @@ BYTE8 CPUWriteKeyboard(BYTE8 pattern);
 BYTE8 CPUReadMemory(WORD16 address);
 BYTE8 CPUReadCharacterROM(int ch,int row);
 void CPUWriteMemory(WORD16 address,BYTE8 data);
-WORD16 CPUGetCycles(void);
+int CPUGetCycles(void);
 void CPUSetPC(WORD16 newPC);
 
 #ifdef INCLUDE_DEBUGGING_SUPPORT													// Only required for debugging
