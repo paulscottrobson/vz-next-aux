@@ -30,23 +30,6 @@
 #endif
 
 // ****************************************************************************
-//
-//							Key codes for the ports
-//
-// ****************************************************************************
-
-static int keys[][8] = {
-	{ 'R','Q','E',0,'W','T',0,0 },
-	{ 'F','A','D',GFXKEY_CONTROL,'S','G',0,0 },
-	{ 'V','Z','C',GFXKEY_SHIFT,'X','B',0,0 },
-	{ '4','1','3',0,'2','5',0,0 },
-	{ 'M',' ',',',0,'.','N',0,0 },
-	{ '7','0','8','-','9','6',0,0 },
-	{ 'U','P','I',GFXKEY_RETURN,'O','Y',0,0 },
-	{ 'J',';','K','@','L','H',0,0 }
-};
-
-// ****************************************************************************
 //					Dummy screen handlers (all done by debugger)
 // ****************************************************************************
 
@@ -68,18 +51,6 @@ void HWXLog(char *logText) {
 void HWXSyncImplementation(LONG32 iCount) {
 	if ((SDL_GetModState() & KMOD_LCTRL) != 0 && 
 		 SDL_GetKeyboardState(NULL)[SDL_SCANCODE_ESCAPE] != 0) CPUReset();			/* Ctrl+ESC is Reset */
-}
-
-// ****************************************************************************
-//					Get the keys pressed for a particular row
-// ****************************************************************************
-
-int HWXGetKeyboardRow(int row) {
-	int word = 0;
-	for (int p = 0;p < 6;p++) {
-		if (GFXIsKeyPressed(keys[row][p])) word |= (0x20 >> p);
-	}
-	return word;
 }
 
 // ****************************************************************************

@@ -11,6 +11,8 @@
 
 #include "espinclude.h"
 
+int nextFrameTime;
+
 // ****************************************************************************
 //
 //								Set up code
@@ -25,7 +27,7 @@ void setup()
 	HWESPSoundInitialise();
 	HWESPKeyboardInitialise();
 	CPUReset();
-	Serial.write("Setup done.\n");
+	nextFrameTime = millis();
 }
 
 // ****************************************************************************
@@ -36,7 +38,10 @@ void setup()
 
 void loop()
 {
-	while (1) {
-		CPUExecuteInstruction();
+    unsigned long frameRate = CPUExecuteInstruction();
+    if (frameRate != 0) {
+		while (millis() < nextFrameTime) {}
+		nextFrameTime = nextFrameTime + 1000 / frameRate;
 	}
-}
+}	
+

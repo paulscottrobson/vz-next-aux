@@ -66,10 +66,6 @@ void HWXSyncImplementation(LONG32 iCount) {
 	// }
 }
 
-// ****************************************************************************
-//								Debug logger
-// ****************************************************************************
-
 void HWXLog(char *logText) {
 	Serial.println(logText);
 }

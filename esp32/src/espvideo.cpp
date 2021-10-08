@@ -23,20 +23,10 @@ fabgl::Canvas        Canvas(&DisplayController);
 static RGB888 pColours[PALETTE_SIZE];
 static uint8_t rawPixels[PALETTE_SIZE];
 
-// // ****************************************************************************
-// //
-// //								Pixel update
-// //
-// // ****************************************************************************
-
-// void HWWritePixelToScreen(WORD16 x,WORD16 y,BYTE8 colour) {
-// 	if (x >= DWIDTH || y >= DHEIGHT) return;
-// 	//Canvas.setPixel(x,y,pColours[colour & 0x3F]);					// Slow
-// 	//BYTE8 *pLine = DisplayController.getScanline(y);
-// 	//pLine[x^2] = x;
-// 	BYTE8 rp = rawPixels[colour & 7];								// Quicker
-// 	VGAController.setRawPixel(x,y,rp);
-// }
+#define DWIDTH 320
+#define DHEIGHT 240 
+#define XOFFSET 32
+#define YOFFSET 24
 
 // ****************************************************************************
 //
@@ -58,26 +48,31 @@ void HWESPVideoInitialise(void) {
 	for (int i = 0;i < PALETTE_SIZE;i++) {
 		BYTE8 *col = HWGetPalette(i);
 		pColours[i].R = col[0];
-		pColours[i].R = col[1];
-		pColours[i].R = col[2];
-	 	rawPixels[i] = VGAController.createRawPixel(RGB222(pColours[i].R>>6,pColours[i].G>>6,pColours[i].B>>6));
+		pColours[i].G = col[1];
+		pColours[i].B = col[2];
+	 	rawPixels[i] = DisplayController.createRawPixel(RGB222(pColours[i].R>>6,pColours[i].G>>6,pColours[i].B>>6));
 	}
-	// //
-	// //		Create 64 colour palette
-	// //
-	// for (int i = 0;i < 8;i++) {
-	// 	pColours[i].R = CONVCOL((i & 1));
-	// 	pColours[i].G = CONVCOL(((i >> 1) & 1));
-	// 	pColours[i].B = CONVCOL(((i >> 2) & 1));
 
-	// 	//BYTE8 r = ((i & 3)) >> 2;
-	// 	//BYTE8 g = ((colours[i] >> 4) & 0x0F) >> 2;
-	// 	//BYTE8 b = ((colours[i] >> 0) & 0x0F) >> 2;
-	// }
+	for (int x = 0;x < 320;x++)
+		for (int y = 0;y < 192;y++)
+			DisplayController.setRawPixel(x,y,rawPixels[(x >> 4) & 15]);
+
 }
 
 void HWXClearScreen(int colour) { 
+	for (int x = 0;x < DWIDTH;x++)
+		for (int y = 0;y < DHEIGHT;y++)
+			DisplayController.setRawPixel(x,y,rawPixels[colour]);
 }
 
 void HWXPlotCharacter(int x,int y,int colour,int bgr,BYTE8 ch) { 
+	x = x * 8 + XOFFSET;
+	y = y * 12 + YOFFSET;
+	for (int y1 = 0;y1 < 12;y1++) {
+		BYTE8 b = CPUReadCharacterROM(ch,y1);
+		for (int x1 = 0;x1 < 8;x1++) {
+			DisplayController.setRawPixel(x+x1,y+y1,rawPixels[(b & 0x80) ? colour:bgr]);
+			b = b << 1;
+		}
+	}
 }

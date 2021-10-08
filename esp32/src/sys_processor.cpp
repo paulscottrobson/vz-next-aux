@@ -102,6 +102,15 @@ static void _Write(WORD16 address,BYTE8 data) {
 	if (address >= 0x6800 && address < 0x7000) {
 		HWWriteControlLatch(data);
 	}
+	if (address >= 0x7000 && address < 0x7800) {
+		if (HWISTEXTMODE() && address < 0x7200) {
+			int ch = READ8(address);
+			int bgr = HWISGREENBACKGROUND() ? 12 : 14;
+			int fgr = bgr+1;
+			if (ch >= 0x80) fgr = (ch & 0x70) >> 4;
+			HWXPlotCharacter((address & 0x1F),(address >> 5) & 0x0F,fgr,bgr,ch);
+		}
+	}
 }
 
 static WORD16 _Fetch16(void) {
@@ -170,7 +179,7 @@ void CPUExit(void) {}
 //												Execute a single instruction
 // *******************************************************************************************************************************
 
-BYTE8 CPUExecuteInstruction(void) {
+int CPUExecuteInstruction(void) {
 	#ifdef INCLUDE_DEBUGGING_SUPPORT
 	if (PC == 0xFFFF) CPUExit();
 	#endif
@@ -190,10 +199,8 @@ BYTE8 CPUExecuteInstruction(void) {
 	cycles = cycles + cyclesPerFrame;												// Adjust this frame rate, up to x16 on HS
 	HWSync();																		// Update any hardware
 	 if (intEnabled) { 																// Interrupt enabled.
-	 	HWXLog("Fire interrupt");
 	  	PUSH(PC);																	// Do RST 38h
 	  	CPUSetPC(0x38);
-	 	HWXLog("End interrupt");
 	 	intEnabled = 0;
 	 }
 	return FRAME_RATE;																// Return frame rate.
@@ -217,10 +224,10 @@ void CPUWriteMemory(WORD16 address,BYTE8 data) {
 //		Execute chunk of code, to either of two break points or frame-out, return non-zero frame rate on frame, breakpoint 0
 // *******************************************************************************************************************************
 
-BYTE8 CPUExecute(WORD16 breakPoint1,WORD16 breakPoint2) { 
+int CPUExecute(WORD16 breakPoint1,WORD16 breakPoint2) { 
 	BYTE8 next;
 	do {
-		BYTE8 r = CPUExecuteInstruction();											// Execute an instruction
+		int r = CPUExecuteInstruction();											// Execute an instruction
 		if (r != 0) return r; 														// Frame out.
 		next = CPUReadMemory(PC);
 	} while (PC != breakPoint1 && PC != breakPoint2 && next != 0x76);				// Stop on breakpoint or $76 HALT break

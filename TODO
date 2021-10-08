@@ -1,3 +1,6 @@
+keyboard routine
+check sound works.
+don't update if not changed
+implement file loading
 directory
 csave
-platformio version

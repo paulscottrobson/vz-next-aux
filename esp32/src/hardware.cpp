@@ -21,6 +21,9 @@ static int lastToggleCycleTime = 0;
 static int cycleToggleCount = 0;
 static int cycleToggleTotal = 0;
 
+static BYTE8 HWForceKey(WORD16 addr,BYTE8 v,int unshifted,int shifted,int controlled);
+static BYTE8 _HWUpdateKey(WORD16 addr,BYTE8 v,int keyInfo);
+
 //	Control 
 //		20 Speaker B
 // 		10 VDC Background colour (0=green,1 = orange/buff)
@@ -37,6 +40,9 @@ void HWReset(void) {
 	HWXSetFrequency(0);
 	lastToggleCycleTime = 0;
 	lastControlWrite = 0;
+	cycleToggleCount = 0;
+	cycleToggleTotal = 0;
+	HWXClearScreen(HWGetBackgroundPalette());
 }
 
 // *******************************************************************************************************************************
@@ -122,17 +128,48 @@ void HWWritePort(WORD16 addr,BYTE8 data) {
 	BYTE8 port = addr & 0xFF;
 }
 
+// ****************************************************************************
+//							Keyboard Mapping
+// ****************************************************************************
+
+static int keys[][8] = {
+	{ 'R','Q','E',0,'W','T',0,0 },
+	{ 'F','A','D',GFXKEY_CONTROL,'S','G',0,0 },
+	{ 'V','Z','C',GFXKEY_SHIFT,'X','B',0,0 },
+	{ '4','1','3',0,'2','5',0,0 },
+	{ 'M',' ',',',0,'.','N',0,0 },
+	{ '7','0','8','-','9','6',0,0 },
+	{ 'U','P','I',GFXKEY_RETURN,'O','Y',0,0 },
+	{ 'J',';','K','@','L','H',0,0 }
+};
+
+// ****************************************************************************
+//					Get the keys pressed for a particular row
+// ****************************************************************************
+
+int HWGetKeyboardRow(int row) {
+	int word = 0;
+	for (int p = 0;p < 6;p++) {
+		if (HWXIsKeyPressed(keys[row][p])) word |= (0x20 >> p);
+	}
+	return word;
+}
+
 // *******************************************************************************************************************************
 //														Read Keyboard lines
 // *******************************************************************************************************************************
 
-static BYTE8 HWForceKey(WORD16 addr,BYTE8 v,int unshifted,int shifted,int controlled);
-static BYTE8 _HWUpdateKey(WORD16 addr,BYTE8 v,int keyInfo);
+// ****************************************************************************
+//
+//							Key codes for the ports
+//
+// ****************************************************************************
+
 
 BYTE8 HWReadKeyboardPort(WORD16 addr) {
 	BYTE8 v = 0;
 	for (int i = 0;i < 8;i++) {
-		if ((addr & (0x01 << i)) == 0) v |= HWXGetKeyboardRow(i);
+		if ((addr & (0x01 << i)) == 0) v |= HWGetKeyboardRow(i);
 	}
 	#include "_keyboard_fix.h"
 	return v ^ 0xFF;

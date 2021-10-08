@@ -25,7 +25,7 @@ typedef unsigned int   LONG32;														// 32 bit type.
 #define AKEY_BACKSPACE	(0x5F)														// Apple Backspace
 
 void CPUReset(void);
-BYTE8 CPUExecuteInstruction(void);
+int CPUExecuteInstruction(void);
 BYTE8 CPUWriteKeyboard(BYTE8 pattern);
 BYTE8 CPUReadMemory(WORD16 address);
 BYTE8 CPUReadCharacterROM(int ch,int row);
@@ -42,7 +42,7 @@ typedef struct __CPUSTATUS {
 } CPUSTATUS;
 
 CPUSTATUS *CPUGetStatus(void);
-BYTE8 CPUExecute(WORD16 breakPoint1,WORD16 breakPoint2);
+int CPUExecute(WORD16 breakPoint1,WORD16 breakPoint2);
 WORD16 CPUGetStepOverBreakpoint(void);
 void CPUEndRun(void);
 void CPULoadBinary(char *fileName);
