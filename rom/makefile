@@ -10,3 +10,4 @@ endif
 all: 
 	ruby export.rb
 	ruby keyboard.rb
+	ruby scancodes.rb

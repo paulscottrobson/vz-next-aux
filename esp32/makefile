@@ -14,7 +14,8 @@ all: update
 serial: update
 	pio device monitor -b 115200
 	
-update:	
+update:
+	make -C ..$(S)emulator
 	$(CCOPY) $(EMUSRC)hardware.cpp src	
 	$(CCOPY) $(EMUSRC)hardware_esp.cpp src	
 	$(CCOPY) $(EMUSRC)sys_processor.cpp src	

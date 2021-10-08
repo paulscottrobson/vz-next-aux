@@ -1,6 +1,11 @@
-keyboard routine
+tests.
+	shift - => equals
+	backspace doesn't work, it is $66, doesn't work on the emulator either !
+	does it actually work ???? try CTRL key.
+
+add rset (CTRL+ESC)
 check sound works.
-don't update if not changed
-implement file loading
+don't update if not changed ?
+implement file loading on ESP32 ?
 directory
 csave
