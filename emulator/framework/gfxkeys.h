@@ -3,7 +3,7 @@
 //
 //		Name:		gfxkeys.h
 //		Purpose:	Keyboard Constants
-//		Created:	1st October 2021
+//		Created:	8th October 2021
 //		Author:		Paul Robson (paul@robsons.org.uk)
 //
 // ****************************************************************************
@@ -37,6 +37,7 @@
 #define GFXKEY_SHIFT		(GFXKEY_BASE+21)
 #define GFXKEY_F11			(GFXKEY_BASE+22)
 #define GFXKEY_F12			(GFXKEY_BASE+23)
+#define GFXKEY_INSERT  		(GFXKEY_BASE+24)
 
 #define GFXISMODIFIERKEY(x)	(GFXISCONTROLKEY(x) || GFXISSHIFTKEY(x))
 #define GFXISSHIFTKEY(x)	((x) == GFXKEY_SHIFT || (x) == GFXKEY_RSHIFT || (x) == GFXKEY_LSHIFT)

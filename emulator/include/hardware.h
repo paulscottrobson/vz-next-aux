@@ -3,7 +3,7 @@
 //
 //		Name:		hardware.h
 //		Purpose:	Hardware Emulation Header
-//		Created:	30th September 2021
+//		Created:	8th October 2021
 //		Author:		Paul Robson (paul@robsons.org.uk)
 //
 // *******************************************************************************************************************************
@@ -20,11 +20,14 @@ void HWWriteControlLatch(BYTE8 data);
 BYTE8 HWGetVideoMode(void);
 BYTE8 *HWGetPalette(BYTE8 colour);
 BYTE8 HWReadKeyboardPort(WORD16 addr);
-int HWGetKeyboardRow(int row);
-void HWSyncImplementation(LONG32 iCount);
 void HWLoadProgram(void);
-WORD16 HWLoadFile(char * fileName,WORD16 *startLoad,WORD16 *endLoad,BYTE8 *type);
 BYTE8 HWGetBackgroundPalette(void);
+
+int HWXGetKeyboardRow(int row);
+void HWXSyncImplementation(LONG32 iCount);
+int HWXIsKeyPressed(int code);
+WORD16 HWXLoadFile(char * fileName,WORD16 *startLoad,WORD16 *endLoad,BYTE8 *type);
+void HWXSetFrequency(int frequency);
 
 #define HWISTEXTMODE() ((HWGetVideoMode() & 0x8) == 0)
 #define HWISGREENBACKGROUND() ((HWGetVideoMode() & 0x10) == 0)

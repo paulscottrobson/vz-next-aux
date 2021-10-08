@@ -3,7 +3,7 @@
 //
 //		Name:		hardware.c
 //		Purpose:	Hardware Emulation
-//		Created:	30th September 2021
+//		Created:	8th October 2021
 //		Author:		Paul Robson (paul@robsons.org.uk)
 //
 // *******************************************************************************************************************************
@@ -32,7 +32,7 @@ static int cycleToggleTotal = 0;
 // *******************************************************************************************************************************
 
 void HWReset(void) {	
-	GFXSetFrequency(0);
+	HWXSetFrequency(0);
 	lastToggleCycleTime = 0;
 	lastControlWrite = 0;
 }
@@ -42,12 +42,12 @@ void HWReset(void) {
 // *******************************************************************************************************************************
 
 void HWSync(void) {
-	HWSyncImplementation(0);
+	HWXSyncImplementation(0);
 	if (lastToggleCycleTime != 0 && cycleToggleCount > 1) {
 		int frequency = CYCLE_RATE /2*cycleToggleCount/cycleToggleTotal; 	// Counting both transitions
-		GFXSetFrequency(frequency);
+		HWXSetFrequency(frequency);
 	} else {
-		GFXSetFrequency(0);
+		HWXSetFrequency(0);
 	}
 	lastToggleCycleTime = 0;
 }
@@ -72,7 +72,7 @@ void HWLoadProgram(void) {
 		fileName[offset++] = 'a';
 	}
 	strcpy(fileName+offset,".vz");
-	int err = HWLoadFile(fileName,&startAddress,&endAddress,&fileType);
+	int err = HWXLoadFile(fileName,&startAddress,&endAddress,&fileType);
 	if (fileType == 0xF1) CPUSetPC(startAddress);
 	if (err) CPUSetPC(0x1E4A);
 
@@ -124,12 +124,41 @@ void HWWritePort(WORD16 addr,BYTE8 data) {
 //														Read Keyboard lines
 // *******************************************************************************************************************************
 
+static BYTE8 HWForceKey(WORD16 addr,BYTE8 v,int unshifted,int shifted,int controlled);
+static BYTE8 _HWUpdateKey(WORD16 addr,BYTE8 v,int keyInfo);
+
 BYTE8 HWReadKeyboardPort(WORD16 addr) {
 	BYTE8 v = 0;
 	for (int i = 0;i < 8;i++) {
-		if ((addr & (0x01 << i)) == 0) v |= HWGetKeyboardRow(i);
+		if ((addr & (0x01 << i)) == 0) v |= HWXGetKeyboardRow(i);
 	}
+	#include "_keyboard_fix.h"
 	return v ^ 0xFF;
+}
+
+static BYTE8 HWForceKey(WORD16 addr,BYTE8 v,int unshifted,int shifted,int controlled) {
+	if (GFXIsKeyPressed(GFXKEY_SHIFT)) {
+		if (shifted != 0) v = _HWUpdateKey(addr,0,shifted);
+	} else if (GFXIsKeyPressed(GFXKEY_CONTROL)) {
+		if (controlled != 0) v = _HWUpdateKey(addr,0,controlled);
+	} else {
+		if (unshifted != 0) v = _HWUpdateKey(addr,0,unshifted);		
+	}
+	return v;
+}
+
+static BYTE8 _HWUpdateKey(WORD16 addr,BYTE8 v,int keyInfo) {
+	if ((addr & ((keyInfo & 0xFF00) >> 8)) == 0) { 						// If required row being scanned.
+		v = v | (keyInfo & 0xFF); 										// Set the bits required.
+	}
+	int modifier = keyInfo >> 16;
+	if (modifier == 1) { 												// Shift.
+		if ((addr & 0x04) == 0) v |= 0x04;
+	}
+	if (modifier == 2) { 												// Ctrl
+		if ((addr & 0x02) == 0) v |= 0x04;
+	}
+	return v;
 }
 
 // *******************************************************************************************************************************
