@@ -3,7 +3,7 @@
 #
 #		Name:		export.rb
 #		Author:		Paul Robson (paul@robsons.org.uk)
-#		Date:		30th September 2021
+#		Date:		8th October 2021
 #		Reviewed: 	No
 #		Purpose:	Export ROM image
 #

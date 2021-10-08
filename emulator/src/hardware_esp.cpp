@@ -13,6 +13,8 @@
 #include "sys_processor.h"
 #include "gfxkeys.h"
 
+int HWESPGetScanCode(void);
+void HWESPSetFrequency(int freq);
 
 // ****************************************************************************
 //							  Sync Hardware
@@ -32,8 +34,8 @@ static int shift = 0;
 static int release = 0;
 static int lastKey = 0;
 
-void HWSyncImplementation(LONG32 iCount) {
-	int scanCode = HWGetScanCode();
+void HWXSyncImplementation(LONG32 iCount) {
+	int scanCode = HWESPGetScanCode();
 	while (scanCode > 0) {
 		if (scanCode == 0xE0) {
 			shift = 0x80;
@@ -50,7 +52,7 @@ void HWSyncImplementation(LONG32 iCount) {
 			shift = 0x00;
 			release = 0x00;
 		}
-		scanCode = HWGetScanCode();
+		scanCode = HWESPGetScanCode();
 	}
 	if (keyStatus[0x14] && keyStatus[0x76]) CPUReset();			/* Ctrl+ESC is Reset */
 
@@ -64,35 +66,30 @@ void HWSyncImplementation(LONG32 iCount) {
 	// }
 }
 
+void HWXLog(char *logText) {
+	Serial.println(logText);
+}
+
 // ****************************************************************************
 //					Get the keys pressed for a particular row
 // ****************************************************************************
 
-int HWGetKeyboardRow(int row) {
+int HWXGetKeyboardRow(int row) {
 	int word = 0;
 	int p = 0;
 	while (keys[row][p] != 0) {
 		if (keyStatus[keys[row][p]]) word |= (1 << p);
 		p++;
 	}
-	if (row == 4 && keyStatus[0x59]) word |= 0x20;		// Right shift.
-	return word;
+	return 0xFF;
 }
 
 // ****************************************************************************
 //					Check if key pressed (GFXKEY values)
 // ****************************************************************************
 
-int  HWIsKeyPressed(int key) {
+int  HWXIsKeyPressed(int key) {
 	return 0;
-}
-
-// ****************************************************************************
-//							Set a display pixel
-// ****************************************************************************
-
-void HWWritePixel(WORD16 x,WORD16 y,BYTE8 colour) {
-	HWWritePixelToScreen(x,y,colour);
 }
 
 // ****************************************************************************
@@ -104,9 +101,9 @@ WORD16 HWGetSystemClock(void) {
 }
 
 // ****************************************************************************
-//						 Control audio channel
+//	 						Set sound pitch, 0 = off
 // ****************************************************************************
 
-void HWWriteAudio(BYTE8 channel,WORD16 freq) {
-	HWSetAudio(channel & 0x0F,freq);
+void HWXSetFrequency(int frequency) {
+	HWESPSetFrequency(frequency);
 }

@@ -11,8 +11,10 @@
 
 #include "sys_processor.h"
 #include "hardware.h"
-#include "gfx.h"
+#include "gfxkeys.h"
+#include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 static int lastControlWrite = 0;
 static int lastToggleCycleTime = 0;
@@ -35,6 +37,9 @@ void HWReset(void) {
 	HWXSetFrequency(0);
 	lastToggleCycleTime = 0;
 	lastControlWrite = 0;
+	cycleToggleCount = 0;
+	cycleToggleTotal = 0;
+	HWXClearScreen(HWGetBackgroundPalette());
 }
 
 // *******************************************************************************************************************************
@@ -137,9 +142,9 @@ BYTE8 HWReadKeyboardPort(WORD16 addr) {
 }
 
 static BYTE8 HWForceKey(WORD16 addr,BYTE8 v,int unshifted,int shifted,int controlled) {
-	if (GFXIsKeyPressed(GFXKEY_SHIFT)) {
+	if (HWXIsKeyPressed(GFXKEY_SHIFT)) {
 		if (shifted != 0) v = _HWUpdateKey(addr,0,shifted);
-	} else if (GFXIsKeyPressed(GFXKEY_CONTROL)) {
+	} else if (HWXIsKeyPressed(GFXKEY_CONTROL)) {
 		if (controlled != 0) v = _HWUpdateKey(addr,0,controlled);
 	} else {
 		if (unshifted != 0) v = _HWUpdateKey(addr,0,unshifted);		

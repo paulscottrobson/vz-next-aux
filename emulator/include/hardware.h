@@ -28,9 +28,14 @@ void HWXSyncImplementation(LONG32 iCount);
 int HWXIsKeyPressed(int code);
 WORD16 HWXLoadFile(char * fileName,WORD16 *startLoad,WORD16 *endLoad,BYTE8 *type);
 void HWXSetFrequency(int frequency);
+void HWXLog(char *logText);
+void HWXClearScreen(int colour);
+void HWXPlotCharacter(int x,int y,int colour,int bgr,BYTE8 ch);
 
 #define HWISTEXTMODE() ((HWGetVideoMode() & 0x8) == 0)
 #define HWISGREENBACKGROUND() ((HWGetVideoMode() & 0x10) == 0)
+
+#define PALETTE_SIZE 		(16)
 
 #ifdef LINUX
 #define FILESEP '/'

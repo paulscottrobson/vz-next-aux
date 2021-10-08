@@ -30,6 +30,8 @@ static WORD16 AFalt,BCalt,DEalt,HLalt; 												// Alternate data set.
 static WORD16 PC,SP; 																// 16 bit registers
 static WORD16 IX,IY; 																// IX IY accessed indirectly.
 
+static char logBuffer[64];
+
 static BYTE8 s_Flag,z_Flag,c_Flag,h_Flag,n_Flag,p_Flag; 							// Flag Registers
 static BYTE8 I,R,intEnabled; 														// We don't really bother with these much.
 
@@ -39,7 +41,7 @@ static LONG32 temp32;
 static WORD16 temp16,temp16a,*pIXY;
 static BYTE8 temp8,oldCarry;
 
-static int cycles;																	// Cycle Count.
+static int cycles = 512;															// Cycle Count.
 static int cyclesPerFrame = CYCLES_PER_FRAME;										// Cycles per frame
 
 // *******************************************************************************************************************************
@@ -99,6 +101,13 @@ static void _Write(WORD16 address,BYTE8 data) {
 	}	
 	if (address >= 0x6800 && address < 0x7000) {
 		HWWriteControlLatch(data);
+	}
+	if (address >= 0x7000 && address < 0x7800) {
+		if (HWISTEXTMODE() && address < 0x7200) {
+			int ch = READ8(address);
+			int bgr = HWISGREENBACKGROUND() ? 12 : 14;
+			HWXPlotCharacter((address & 0x1F),(address >> 5) & 0x0F,bgr+1,bgr,ch);
+		}
 	}
 }
 
@@ -172,6 +181,12 @@ BYTE8 CPUExecuteInstruction(void) {
 	#ifdef INCLUDE_DEBUGGING_SUPPORT
 	if (PC == 0xFFFF) CPUExit();
 	#endif
+
+	if (PC == 0xFFD0) {
+		sprintf(logBuffer,"PC %x %x",PC,HL());
+		HWXLog(logBuffer);
+		}
+
 	BYTE8 opcode = FETCH8();														// Fetch opcode.
 	switch(opcode) {																// Execute it.
 		#include "_code_group_0.h"
@@ -181,10 +196,11 @@ BYTE8 CPUExecuteInstruction(void) {
 	if (cycles >= 0 ) return 0;														// Not completed a frame.
 	cycles = cycles + cyclesPerFrame;												// Adjust this frame rate, up to x16 on HS
 	HWSync();																		// Update any hardware
-	if (intEnabled) { 																// Interrupt enabled.
-		PUSH(PC);PC = 0x38; 														// Do RST 38h
-		intEnabled = 0;
-	}
+	 if (intEnabled) { 																// Interrupt enabled.
+	  	PUSH(PC);																	// Do RST 38h
+	  	CPUSetPC(0x38);
+	 	intEnabled = 0;
+	 }
 	return FRAME_RATE;																// Return frame rate.
 }
 
