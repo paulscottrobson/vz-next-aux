@@ -19,10 +19,11 @@ update:
 	$(CCOPY) $(EMUSRC)hardware.cpp src	
 	$(CCOPY) $(EMUSRC)hardware_esp.cpp src	
 	$(CCOPY) $(EMUSRC)sys_processor.cpp src	
-	$(CCOPY) $(EMUROOT)include/* include
-	$(CCOPY) $(EMUROOT)roms/* include
-	$(CCOPY) $(EMUROOT)cpu/* include
+	$(CCOPY) $(EMUROOT)include/*.* include
+	$(CCOPY) $(EMUROOT)roms/*.* include
+	$(CCOPY) $(EMUROOT)cpu/*.* include
 	$(CCOPY) $(EMUROOT)framework/gfxkeys.h include
+	$(CCOPY) $(EMUROOT)storage/*.* data
 	pio lib install 6143 	
 	pio run -t upload
-#	pio run -t uploadfs	
+	pio run -t uploadfs	

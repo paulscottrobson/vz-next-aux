@@ -54,7 +54,7 @@ void HWXSyncImplementation(LONG32 iCount) {
 		keyStatus[GFXKEY_SHIFT] = keyStatus[GFXKEY_LSHIFT]|keyStatus[GFXKEY_RSHIFT];
 		keyStatus[GFXKEY_CONTROL] = keyStatus[GFXKEY_LCTRL]|keyStatus[GFXKEY_RCTRL];
 	}
-	if (keyStatus[0x14] && keyStatus[0x76]) CPUReset();			/* Ctrl+ESC is Reset */
+	if (keyStatus[GFXKEY_CONTROL] && keyStatus[GFXKEY_ESCAPE]) CPUReset();			/* Ctrl+ESC is Reset */
 }
 
 void HWXLog(char *logText) {

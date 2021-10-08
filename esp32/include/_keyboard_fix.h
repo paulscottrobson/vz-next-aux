@@ -17,5 +17,5 @@ if (HWXIsKeyPressed(GFXKEY_UP)) v = HWForceKey(addr,v,0x21002,0x0,0x0);
 if (HWXIsKeyPressed(GFXKEY_DOWN)) v = HWForceKey(addr,v,0x21010,0x0,0x0);
 if (HWXIsKeyPressed(GFXKEY_LEFT)) v = HWForceKey(addr,v,0x21020,0x0,0x0);
 if (HWXIsKeyPressed(GFXKEY_RIGHT)) v = HWForceKey(addr,v,0x21008,0x0,0x0);
-if (HWXIsKeyPressed(GFXKEY_BACKSPACE)) v = HWForceKey(addr,v,0x28010,0x0,0x0);
+if (HWXIsKeyPressed(GFXKEY_DELETE)) v = HWForceKey(addr,v,0x28010,0x0,0x0);
 if (HWXIsKeyPressed(GFXKEY_INSERT)) v = HWForceKey(addr,v,0x28002,0x0,0x0);

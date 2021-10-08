@@ -46,7 +46,7 @@ class KeyboardMapping_UK
 			"DOWN" => " ",
 			"LEFT" => "M",
 			"RIGHT" => ",",
-			"BACKSPACE" => ";",
+			"DELETE" => ";",
 			"INSERT" => "L"
  		}
 	end
