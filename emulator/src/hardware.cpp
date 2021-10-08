@@ -111,7 +111,6 @@ void HWWriteControlLatch(BYTE8 data) {
 //												Port Read/Write
 // *******************************************************************************************************************************
 
-
 BYTE8 HWReadPort(WORD16 addr) {
 	BYTE8 v = 0xFF;
 	return v;
@@ -170,4 +169,18 @@ BYTE8 *HWGetPalette(BYTE8 colour) {
 
 BYTE8 HWGetVideoMode(void) {
 	return lastControlWrite & 0x18;
+}
+
+// *******************************************************************************************************************************
+//												Get Background Palette Colour ID
+// *******************************************************************************************************************************
+
+BYTE8 HWGetBackgroundPalette(void) {
+	int background;
+	if (HWISTEXTMODE()) {
+		background = HWISGREENBACKGROUND() ? 12:14;
+	} else {
+		background = HWISGREENBACKGROUND() ? 9:11;
+	}
+	return background;
 }

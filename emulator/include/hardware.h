@@ -24,6 +24,10 @@ int HWGetKeyboardRow(int row);
 void HWSyncImplementation(LONG32 iCount);
 void HWLoadProgram(void);
 WORD16 HWLoadFile(char * fileName,WORD16 *startLoad,WORD16 *endLoad,BYTE8 *type);
+BYTE8 HWGetBackgroundPalette(void);
+
+#define HWISTEXTMODE() ((HWGetVideoMode() & 0x8) == 0)
+#define HWISGREENBACKGROUND() ((HWGetVideoMode() & 0x10) == 0)
 
 #ifdef LINUX
 #define FILESEP '/'

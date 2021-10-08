@@ -40,8 +40,8 @@ static const char *_mnemonics_ddcb[256] = {
 	#include "_mnemonics_group_ddcb.h"
 };
 
-static void DGBXRenderTextLine(int isGreenBackground,int y,int x1,int y1,int xSize,int ySize);
-static void DGBXRenderGraphicsLine(int isGreenBackground,int y,int x1,int y1,int xSize,int ySize);
+static void DGBXRenderTextLine(int y,int x1,int y1,int xSize,int ySize);
+static void DGBXRenderGraphicsLine(int y,int x1,int y1,int xSize,int ySize);
 
 // *******************************************************************************************************************************
 //										 Palette conversion to 4 bit format
@@ -168,32 +168,24 @@ void DBGXRender(int *address,int showDisplay) {
 		int ys = 16;
 		int xSize = 3;
 		int ySize = 3;
-		int isTextMode = (HWGetVideoMode() & 0x8) == 0;
-		int isGreenBackground = (HWGetVideoMode() & 0x10) == 0;
 		if (showDisplay) {
 			int x1 = WIN_WIDTH/2-xs*xSize*8/2;
 			int y1 = WIN_HEIGHT/2-ys*ySize*12/2;
 			SDL_Rect r;
 			int b = 64;
-			int background;
-			if (isTextMode) {
-				background = isGreenBackground ? 12:14;
-			} else {
-				background = isGreenBackground ? 9:11;
-			}
-			background = DBGXPalette(background);
+			int background = DBGXPalette(HWGetBackgroundPalette());
 			r.x = x1-b;r.y = y1-b;r.w = xs*xSize*8+b*2;r.h=ys*ySize*8+b*2;			
 			GFXRectangle(&r,0);
 			b = b - 4;
 			r.x = x1-b;r.y = y1-b;r.w = xs*xSize*8+b*2;r.h=ys*ySize*12+b*2;
 			GFXRectangle(&r,background);
 
-			if (isTextMode) {
+			if (HWISTEXTMODE()) {
 				for (int y = 0;y < ys;y++)
-					DGBXRenderTextLine(isGreenBackground,y,x1,y1,xSize,ySize);
+					DGBXRenderTextLine(y,x1,y1,xSize,ySize);
 			} else {
 				for (int y = 0;y < 64;y++) 
-					DGBXRenderGraphicsLine(isGreenBackground,y,x1,y1,xSize,ySize);
+					DGBXRenderGraphicsLine(y,x1,y1,xSize,ySize);
 		 	}
 		}
 	}
@@ -203,13 +195,13 @@ void DBGXRender(int *address,int showDisplay) {
 //															Render one line
 // *******************************************************************************************************************************
 
-static void DGBXRenderTextLine(int isGreenBackground,int y,int x1,int y1,int xSize,int ySize) {
+static void DGBXRenderTextLine(int y,int x1,int y1,int xSize,int ySize) {
 	for (int x = 0;x < 32;x++) 
 	{
  		int ch = CPUReadMemory(0x7000+x+y*32);
  		int fgr;
  		if (ch < 0x80) {
- 			fgr = DBGXPalette(isGreenBackground ? 13 : 15);
+ 			fgr = DBGXPalette(HWISGREENBACKGROUND() ? 13 : 15);
  		} else {
  			fgr = DBGXPalette((ch & 0x70) >> 4);
  		}
@@ -218,26 +210,24 @@ static void DGBXRenderTextLine(int isGreenBackground,int y,int x1,int y1,int xSi
  		SDL_Rect rc;
 
  		rc.w = xSize;rc.h = ySize;							// Width and Height of pixel.
-		for (int y = 0;y < 12;y++) {							// 8 Down
+		for (int y = 0;y < 12;y++) {						// 12 Down
 			rc.x = xc;
 			rc.y = yc + y * ySize;
 			int f = CPUReadCharacterROM(ch,y);
- 		for (int x = 0;x < 8;x++) {							// 8 Across
-				if (f & 0x80) {		
-					GFXRectangle(&rc,fgr);			
-				}
-				f <<= 1;
-				rc.x += xSize;
+	 		for (int x = 0;x < 8;x++) {						// 8 Across
+					if (f & 0x80) GFXRectangle(&rc,fgr);			
+					f <<= 1;
+					rc.x += xSize;
 			}
- 		}
+	 	}
  	}
 }
 
-static void DGBXRenderGraphicsLine(int isGreenBackground,int y,int x1,int y1,int xSize,int ySize) {
+static void DGBXRenderGraphicsLine(int y,int x1,int y1,int xSize,int ySize) {
 	SDL_Rect rc;
 	for (int x = 0;x < 32;x++) {
 		int b = CPUReadMemory(0x7000+x+y*32);
-		int step = isGreenBackground ? 0 : 4;
+		int step = HWISGREENBACKGROUND() ? 0 : 4;
 		rc.x = x1 + x * 4 * xSize * 2;rc.y = y1+y*ySize*3;rc.w = xSize*2;rc.h = ySize*3;
 		for (int px = 0;px < 4;px++) {
 			int col = (b & 0xC0) >> 6;
