@@ -1,5 +1,4 @@
 TODO:
-	check sound works physically.
 	implement file loading on ESP32 ?
 	implement mode 1 graphics.
 	implement mandatory redraw on mode change.

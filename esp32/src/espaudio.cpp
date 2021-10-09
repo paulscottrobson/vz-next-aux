@@ -21,7 +21,9 @@ static SquareWaveformGenerator square1;
 // ****************************************************************************
 
 void HWESPSoundInitialise(void) {
-	soundGen.attach(&square1);
+  	soundGen.setVolume(126);
+  	soundGen.play(true);	
+  	soundGen.attach(&square1);	
 	square1.enable(false);
 }
 
