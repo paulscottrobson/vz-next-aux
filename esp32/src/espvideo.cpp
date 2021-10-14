@@ -76,3 +76,16 @@ void HWXPlotCharacter(int x,int y,int colour,int bgr,BYTE8 ch) {
 		}
 	}
 }
+
+void HWXPlotPixel(int x,int y,int colour) {
+	x = x * 2 + XOFFSET;
+	y = y * 3 + YOFFSET;
+	uint8_t col = rawPixels[colour];
+	DisplayController.setRawPixel(x+0,y+0,col);
+	DisplayController.setRawPixel(x+1,y+0,col);
+	DisplayController.setRawPixel(x+0,y+1,col);
+	DisplayController.setRawPixel(x+1,y+1,col);
+	DisplayController.setRawPixel(x+0,y+2,col);
+	DisplayController.setRawPixel(x+1,y+2,col);
+}
+

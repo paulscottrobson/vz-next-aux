@@ -44,6 +44,8 @@ static BYTE8 temp8,oldCarry;
 static int cycles = 512;															// Cycle Count.
 static int cyclesPerFrame = CYCLES_PER_FRAME;										// Cycles per frame
 
+#define CYCLES(n) cycles -= (n)
+
 // *******************************************************************************************************************************
 //														ROM Image
 // *******************************************************************************************************************************
@@ -96,19 +98,26 @@ static inline BYTE8 _FastRead(WORD16 address) {
 }
 
 static void _Write(WORD16 address,BYTE8 data) {
+	BYTE8 oldByte = ramMemory[address];
 	if (address >= 0x4000 && address <= RAMSIZE) {
 		ramMemory[address] = data;
 	}	
 	if (address >= 0x6800 && address < 0x7000) {
 		HWWriteControlLatch(data);
 	}
-	if (address >= 0x7000 && address < 0x7800) {
+	if (address >= 0x7000 && address < 0x7800 && oldByte != data) {
 		if (HWISTEXTMODE() && address < 0x7200) {
 			int ch = READ8(address);
 			int bgr = HWISGREENBACKGROUND() ? 12 : 14;
 			int fgr = bgr+1;
 			if (ch >= 0x80) fgr = (ch & 0x70) >> 4;
 			HWXPlotCharacter((address & 0x1F),(address >> 5) & 0x0F,fgr,bgr,ch);
+		} else {
+			int step = HWISGREENBACKGROUND() ? 0 : 4;
+			for (int px = 0;px < 4;px++) {
+				HWXPlotPixel((address & 0x1F)*4+px,(address >> 5) & 0x3F,((data >> 6) & 3)+step);
+				data = data << 2;
+			}
 		}
 	}
 }

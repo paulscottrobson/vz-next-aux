@@ -97,7 +97,13 @@ void HWWriteControlLatch(BYTE8 data) {
 	// 		Check mode change or background change.
 	//
 	if ((data & 0x18) != (lastControlWrite & 0x18)) {
-		// TODO: Refresh screen entirely on mode change.
+		HWXClearScreen(HWGetBackgroundPalette());
+		int s = HWISTEXTMODE() ? 512 : 2048;
+		for (int a = 0x7000;a < 0x7000+s;a++) {
+			BYTE8 b = CPUReadMemory(a);
+			CPUWriteMemory(a,b ^ 0xFF);
+			CPUWriteMemory(a,b);
+		}
 	}
 	//
 	// 		Assume pushing and pulling :)
@@ -155,16 +161,11 @@ int HWGetKeyboardRow(int row) {
 	return word;
 }
 
-// *******************************************************************************************************************************
-//														Read Keyboard lines
-// *******************************************************************************************************************************
-
 // ****************************************************************************
 //
 //							Key codes for the ports
 //
 // ****************************************************************************
-
 
 BYTE8 HWReadKeyboardPort(WORD16 addr) {
 	BYTE8 v = 0;

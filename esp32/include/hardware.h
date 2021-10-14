@@ -31,6 +31,7 @@ void HWXSetFrequency(int frequency);
 void HWXLog(char *logText);
 void HWXClearScreen(int colour);
 void HWXPlotCharacter(int x,int y,int colour,int bgr,BYTE8 ch);
+void HWXPlotPixel(int x,int y,int colour);
 
 #define HWISTEXTMODE() ((HWGetVideoMode() & 0x8) == 0)
 #define HWISGREENBACKGROUND() ((HWGetVideoMode() & 0x10) == 0)

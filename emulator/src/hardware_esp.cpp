@@ -13,6 +13,7 @@
 #include "sys_processor.h"
 #include "gfxkeys.h"
 #include "hardware.h"
+#include "espinclude.h"
 
 int HWESPGetScanCode(void);
 void HWESPSetFrequency(int freq);
@@ -84,3 +85,32 @@ WORD16 HWGetSystemClock(void) {
 void HWXSetFrequency(int frequency) {
 	HWESPSetFrequency(frequency);
 }
+
+// ****************************************************************************
+// 									Load file
+// ****************************************************************************
+
+WORD16 HWXLoadFile(char * fileName,WORD16 *startLoad,WORD16 *endLoad,BYTE8 *type) {
+	char fullName[128];
+	if (fileName[0] == 0) return 1;
+	sprintf(fullName,"/%s",fileName);
+	WORD16 exists = SPIFFS.exists(fullName);		// If file exitst
+	if (exists != 0) {
+		File file = SPIFFS.open(fullName);			// Open it
+		for (int i = 0;i < 21;i++) file.read(); 	// Don't care (21 bytes)
+		int fType = file.read(); 					// File type (1 byte)
+		int start = file.read(); 					// Load Address (2 bytes)
+		start = start + (file.read() << 8);
+		*startLoad = start; 						// Return start address
+		while (file.available()) { 					// Rest is data
+			BYTE8 data = file.read();
+			CPUWriteMemory(start++,data);
+		}
+		file.close();
+		*type = fType & 0xFF; 						// Return type
+		*endLoad = start & 0xFFFF; 					// And location
+	}
+	return exists == 0;
+}
+
+

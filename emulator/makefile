@@ -11,10 +11,13 @@ SOURCES = 	src$(S)sys_processor.o  framework$(S)main.o framework$(S)gfx.o framew
   
 CC = g++
 
-.PHONY: all clean emulator test prebuild 
+.PHONY: all clean emulator test prebuild esp32
+
 all: emulator
 #	.$(S)$(APPNAME) 
 
+esp32:
+	make -C ..$(S)esp32
 run: emulator 
 	.$(S)$(APPNAME) filename go
 

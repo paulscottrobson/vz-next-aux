@@ -67,7 +67,7 @@ case 0x0f: /**** $0f:rrca ****/
 
 case 0x10: /**** $10:djnz $o ****/
 	B--;JUMPR(B != 0);
-	cycles -= 13;break;
+	cycles -= 8;break;
 
 case 0x11: /**** $11:ld de,$2 ****/
 	temp16 = FETCH16(); SETDE(temp16);;
@@ -99,7 +99,7 @@ case 0x17: /**** $17:rla ****/
 
 case 0x18: /**** $18:jr $o ****/
 	JUMPR(1);
-	cycles -= 12;break;
+	cycles -= 7;break;
 
 case 0x19: /**** $19:add hl,de ****/
 	temp16 = add16(HL(),DE()); SETHL(temp16);;
@@ -131,7 +131,7 @@ case 0x1f: /**** $1f:rra ****/
 
 case 0x20: /**** $20:jr nz,$o ****/
 	JUMPR(TESTNZ());
-	cycles -= 12;break;
+	cycles -= 7;break;
 
 case 0x21: /**** $21:ld hl,$2 ****/
 	temp16 = FETCH16(); SETHL(temp16);;
@@ -163,7 +163,7 @@ case 0x27: /**** $27:daa ****/
 
 case 0x28: /**** $28:jr z,$o ****/
 	JUMPR(TESTZ());
-	cycles -= 12;break;
+	cycles -= 7;break;
 
 case 0x29: /**** $29:add hl,hl ****/
 	temp16 = add16(HL(),HL()); SETHL(temp16);;
@@ -195,7 +195,7 @@ case 0x2f: /**** $2f:cpl ****/
 
 case 0x30: /**** $30:jr nc,$o ****/
 	JUMPR(TESTNC());
-	cycles -= 12;break;
+	cycles -= 7;break;
 
 case 0x31: /**** $31:ld sp,$2 ****/
 	temp16 = FETCH16(); SETSP(temp16);;
@@ -227,7 +227,7 @@ case 0x37: /**** $37:scf ****/
 
 case 0x38: /**** $38:jr c,$o ****/
 	JUMPR(TESTC());
-	cycles -= 12;break;
+	cycles -= 7;break;
 
 case 0x39: /**** $39:add hl,sp ****/
 	temp16 = add16(HL(),SP()); SETHL(temp16);;
@@ -771,7 +771,7 @@ case 0xbf: /**** $bf:cp a ****/
 
 case 0xc0: /**** $c0:ret nz ****/
 	RETURN(TESTNZ());
-	cycles -= 8;break;
+	cycles -= 5;break;
 
 case 0xc1: /**** $c1:pop bc ****/
 	temp16 = POP();SETBC(temp16);
@@ -787,7 +787,7 @@ case 0xc3: /**** $c3:jp $2 ****/
 
 case 0xc4: /**** $c4:call nz,$2 ****/
 	CALL(TESTNZ());
-	cycles -= 14;break;
+	cycles -= 10;break;
 
 case 0xc5: /**** $c5:push bc ****/
 	PUSH(BC());
@@ -797,17 +797,17 @@ case 0xc6: /**** $c6:add $1 ****/
 	ALUADD(FETCH8());
 	cycles -= 7;break;
 
-case 0xc7: /**** $c7:rst 00_h ****/
+case 0xc7: /**** $c7:rst $00 ****/
 	PUSH(PC);PC = 0x00;;
 	cycles -= 11;break;
 
 case 0xc8: /**** $c8:ret z ****/
 	RETURN(TESTZ());
-	cycles -= 8;break;
+	cycles -= 5;break;
 
 case 0xc9: /**** $c9:ret ****/
 	RETURN(1);
-	cycles -= 10;break;
+	cycles -= 4;break;
 
 case 0xca: /**** $ca:jp z,$2 ****/
 	JUMP(TESTZ());
@@ -819,23 +819,23 @@ case 0xcb: /**** $cb:[cb] ****/
 
 case 0xcc: /**** $cc:call z,$2 ****/
 	CALL(TESTZ());
-	cycles -= 14;break;
+	cycles -= 10;break;
 
 case 0xcd: /**** $cd:call $2 ****/
 	CALL(1);
-	cycles -= 17;break;
+	cycles -= 10;break;
 
 case 0xce: /**** $ce:adc $1 ****/
 	ALUADC(FETCH8());
 	cycles -= 7;break;
 
-case 0xcf: /**** $cf:rst 08_h ****/
+case 0xcf: /**** $cf:rst $08 ****/
 	PUSH(PC);PC = 0x08;;
 	cycles -= 11;break;
 
 case 0xd0: /**** $d0:ret nc ****/
 	RETURN(TESTNC());
-	cycles -= 8;break;
+	cycles -= 5;break;
 
 case 0xd1: /**** $d1:pop de ****/
 	temp16 = POP();SETDE(temp16);
@@ -851,7 +851,7 @@ case 0xd3: /**** $d3:out ($1),a ****/
 
 case 0xd4: /**** $d4:call nc,$2 ****/
 	CALL(TESTNC());
-	cycles -= 14;break;
+	cycles -= 10;break;
 
 case 0xd5: /**** $d5:push de ****/
 	PUSH(DE());
@@ -861,13 +861,13 @@ case 0xd6: /**** $d6:sub $1 ****/
 	ALUSUB(FETCH8());
 	cycles -= 7;break;
 
-case 0xd7: /**** $d7:rst 10_h ****/
+case 0xd7: /**** $d7:rst $10 ****/
 	PUSH(PC);PC = 0x10;;
 	cycles -= 11;break;
 
 case 0xd8: /**** $d8:ret c ****/
 	RETURN(TESTC());
-	cycles -= 8;break;
+	cycles -= 5;break;
 
 case 0xd9: /**** $d9:exx ****/
 	temp16 = BC();SETBC(BCalt);BCalt = temp16; temp16 = DE();SETDE(DEalt);DEalt = temp16; temp16 = HL();SETHL(HLalt);HLalt = temp16;;
@@ -883,7 +883,7 @@ case 0xdb: /**** $db:in a,($1) ****/
 
 case 0xdc: /**** $dc:call c,$2 ****/
 	CALL(TESTC());
-	cycles -= 14;break;
+	cycles -= 10;break;
 
 case 0xdd: /**** $dd:[ix] ****/
 	pIXY = &IX; ExecuteDDGroup();;
@@ -893,13 +893,13 @@ case 0xde: /**** $de:sbc $1 ****/
 	ALUSBC(FETCH8());
 	cycles -= 7;break;
 
-case 0xdf: /**** $df:rst 18_h ****/
+case 0xdf: /**** $df:rst $18 ****/
 	PUSH(PC);PC = 0x18;;
 	cycles -= 11;break;
 
 case 0xe0: /**** $e0:ret po ****/
 	RETURN(TESTPO());
-	cycles -= 8;break;
+	cycles -= 5;break;
 
 case 0xe1: /**** $e1:pop hl ****/
 	temp16 = POP();SETHL(temp16);
@@ -915,7 +915,7 @@ case 0xe3: /**** $e3:ex (sp),hl ****/
 
 case 0xe4: /**** $e4:call po,$2 ****/
 	CALL(TESTPO());
-	cycles -= 14;break;
+	cycles -= 10;break;
 
 case 0xe5: /**** $e5:push hl ****/
 	PUSH(HL());
@@ -925,13 +925,13 @@ case 0xe6: /**** $e6:and $1 ****/
 	ALUAND(FETCH8());
 	cycles -= 7;break;
 
-case 0xe7: /**** $e7:rst 20_h ****/
+case 0xe7: /**** $e7:rst $20 ****/
 	PUSH(PC);PC = 0x20;;
 	cycles -= 11;break;
 
 case 0xe8: /**** $e8:ret pe ****/
 	RETURN(TESTPE());
-	cycles -= 8;break;
+	cycles -= 5;break;
 
 case 0xe9: /**** $e9:jp (hl) ****/
 	PC = HL();
@@ -947,7 +947,7 @@ case 0xeb: /**** $eb:ex de,hl ****/
 
 case 0xec: /**** $ec:call pe,$2 ****/
 	CALL(TESTPE());
-	cycles -= 14;break;
+	cycles -= 10;break;
 
 case 0xed: /**** $ed:[ed] ****/
 	ExecuteEDGroup();;
@@ -957,13 +957,13 @@ case 0xee: /**** $ee:xor $1 ****/
 	ALUXOR(FETCH8());
 	cycles -= 7;break;
 
-case 0xef: /**** $ef:rst 28_h ****/
+case 0xef: /**** $ef:rst $28 ****/
 	PUSH(PC);PC = 0x28;;
 	cycles -= 11;break;
 
 case 0xf0: /**** $f0:ret p ****/
 	RETURN(TESTP());
-	cycles -= 8;break;
+	cycles -= 5;break;
 
 case 0xf1: /**** $f1:pop af ****/
 	temp16 = POP();SETAF(temp16);
@@ -979,7 +979,7 @@ case 0xf3: /**** $f3:di ****/
 
 case 0xf4: /**** $f4:call p,$2 ****/
 	CALL(TESTP());
-	cycles -= 14;break;
+	cycles -= 10;break;
 
 case 0xf5: /**** $f5:push af ****/
 	PUSH(AF());
@@ -989,13 +989,13 @@ case 0xf6: /**** $f6:or $1 ****/
 	ALUOR(FETCH8());
 	cycles -= 7;break;
 
-case 0xf7: /**** $f7:rst 30_h ****/
+case 0xf7: /**** $f7:rst $30 ****/
 	PUSH(PC);PC = 0x30;;
 	cycles -= 11;break;
 
 case 0xf8: /**** $f8:ret m ****/
 	RETURN(TESTM());
-	cycles -= 8;break;
+	cycles -= 5;break;
 
 case 0xf9: /**** $f9:ld sp,hl ****/
 	SETSP(HL());
@@ -1011,7 +1011,7 @@ case 0xfb: /**** $fb:ei ****/
 
 case 0xfc: /**** $fc:call m,$2 ****/
 	CALL(TESTM());
-	cycles -= 14;break;
+	cycles -= 10;break;
 
 case 0xfd: /**** $fd:[iy] ****/
 	pIXY = &IY; ExecuteDDGroup();;
@@ -1021,7 +1021,7 @@ case 0xfe: /**** $fe:cp $1 ****/
 	ALUCP(FETCH8());
 	cycles -= 7;break;
 
-case 0xff: /**** $ff:rst 38_h ****/
+case 0xff: /**** $ff:rst $38 ****/
 	PUSH(PC);PC = 0x38;;
 	cycles -= 11;break;
 

@@ -1,9 +1,6 @@
 TODO:
-	implement file loading on ESP32 ?
-	implement mode 1 graphics.
-	implement mandatory redraw on mode change.
-	don't update screen if memory not changed ?
 	fix to generate fast mode
 	fix to generate palette changes
 	directory on blank cload ala CBM
 	csave
+	don't update screen if memory not changed ?
